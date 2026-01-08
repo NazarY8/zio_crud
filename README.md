@@ -33,6 +33,8 @@ The service exposes RESTful API endpoints and provides interactive API documenta
 
 - **ZIO Logging** - Functional logging library integrated with ZIO effects, providing structured logging with context propagation.
 
+- **ZIO Prelude** - Functional data types and abstractions library providing type-safe validation, newtype wrappers, and functional programming utilities. Used for composable input validation with clear error accumulation.
+
 ### AWS & Database
 
 - **ZIO DynamoDB** - High-level, type-safe API for AWS DynamoDB with automatic serialization/deserialization using ZIO Schema.
@@ -102,7 +104,7 @@ curl -X POST http://localhost:8080/users \
   }'
 ```
 
-**Response:** `200 OK` (empty body on success)
+**Response:** `201 Created` (empty body on success)
 
 ---
 
@@ -143,7 +145,7 @@ curl -X PUT "http://localhost:8080/users/?email=john.doe@example.com" \
   }'
 ```
 
-**Response:** `true` (success) or `false` (user not found)
+**Response:** `204 No Content` (success) or `400 Bad Request` with error message
 
 ---
 
@@ -157,7 +159,7 @@ Deletes a user by email address.
 curl -X DELETE "http://localhost:8080/users/?email=john.doe@example.com"
 ```
 
-**Response:** `true` (deleted) or `false` (user not found)
+**Response:** `204 No Content` (success) or `400 Bad Request` with error message
 
 ---
 
@@ -189,6 +191,102 @@ curl -X GET http://localhost:8080/users/list
 
 ---
 
+## ✅ Input Validation Examples
+
+The API includes comprehensive input validation using **ZIO Prelude** for type-safe validation.
+
+### Invalid Email Format
+
+```bash
+curl -X POST http://localhost:8080/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John",
+    "surName": "Doe",
+    "email": "invalid-email"
+  }'
+```
+
+**Response:**
+```
+Invalid input: Invalid email format: 'invalid-email'
+```
+
+---
+
+### Missing Required Fields
+
+```bash
+curl -X POST http://localhost:8080/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "",
+    "surName": "Doe",
+    "email": "john@example.com"
+  }'
+```
+
+**Response:**
+```
+Invalid input: Name is required
+```
+
+---
+
+### Duplicate User (Uniqueness Check)
+
+```bash
+# Try to create the same user twice
+curl -X POST http://localhost:8080/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John",
+    "surName": "Doe",
+    "email": "john@example.com"
+  }'
+```
+
+**Response on second attempt:**
+```
+User with email 'john@example.com' already exists
+```
+
+---
+
+### User Not Found
+
+```bash
+curl -X GET "http://localhost:8080/users/?email=nonexistent@example.com"
+```
+
+**Response:**
+```
+User with email 'nonexistent@example.com' not found
+```
+
+---
+
+### Email Mismatch on Update
+
+```bash
+curl -X PUT "http://localhost:8080/users/?email=john@example.com" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John",
+    "surName": "Doe",
+    "email": "different@example.com"
+  }'
+```
+
+**Response:**
+```
+Email in URL must match email in request body
+```
+
+**Note:** Email cannot be changed as it's the primary key in DynamoDB.
+
+---
+
 ## 📝 Project Architecture
 
 ```
@@ -197,7 +295,9 @@ src/main/scala/
 ├── config/
 │   └── AwsConfig.scala          # AWS configuration model
 ├── models/
-│   └── User.scala               # User domain model
+│   ├── User.scala               # User domain model
+│   ├── UserError.scala          # Domain-specific error types
+│   └── UserValidation.scala    # Input validation logic
 ├── dao/
 │   └── UserDao.scala            # Data access layer
 ├── services/
@@ -224,6 +324,13 @@ This project was created for **educational purposes** to practice and demonstrat
 - Dependency injection with ZLayer
 - Effect management with ZIO
 
+### Implemented Features
+
+- ✅ **Input Validation** - Email format, required fields, business rules (uniqueness)
+- ✅ **Typed Errors** - Domain-specific error types with clear messages
+- ✅ **Swagger UI** - Interactive API documentation
+- ✅ **Clean Architecture** - Proper separation of concerns (Controller/Service/DAO)
+
 ### Potential Enhancements
 
 The following features could be added to make this production-ready:
@@ -233,30 +340,35 @@ The following features could be added to make this production-ready:
    - Role-based access control (RBAC)
    - OAuth2 integration
 
-2. **Input Validation**
-   - Email format validation
-   - Required field checks
-   - Business rules validation (e.g., unique constraints)
-
-3. **Testing**
+2. **Testing**
    - Unit tests for business logic
    - Integration tests with test containers
    - Property-based testing
    - Mock DynamoDB for testing
 
-4. **Observability**
+3. **Observability**
    - Metrics collection (Prometheus)
    - Distributed tracing (OpenTelemetry)
    - Structured logging with correlation IDs
 
-5. **Resilience**
+4. **Resilience**
    - Retry policies for AWS operations
    - Circuit breakers
    - Rate limiting
 
-6. **API Versioning**
+5. **API Versioning**
    - Support for multiple API versions
    - Backward compatibility handling
+
+---
+
+## 📚 Learning Resources
+
+Check out **[ZIO_CHEATSHEET.md](./ZIO_CHEATSHEET.md)** for:
+- ZIO effects, fibers, and parallelism explained
+- Code examples comparing ZIO with Cats Effect and Future
+- How ZIO maps to JVM threads
+- ZIO Schema, Runtime, and Environment patterns
 
 ---
 

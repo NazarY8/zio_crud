@@ -22,14 +22,10 @@ libraryDependencies ++= Seq(
   "dev.zio" %% "zio-config-magnolia" % "4.0.2",
   //for zio logs
   "dev.zio" %% "zio-logging" % "2.5.0",
+  //for zio validation
+  "dev.zio" %% "zio-prelude" % "1.0.0-RC41",
 
-  // AWS - In case when examples of logic out of the box from zio-dynamodb are not enough, and we need to write something truly unique.
-  // Then it is worth hiding through direct access to the entire DynamoDB API (streams, low-level pagination, tricky attribute updates, custom retries, or raw AWS SDK).
-  // "dev.zio" %% "zio-aws-core" % "7.40.9.1",
-  // "dev.zio" %% "zio-aws-dynamodb" % "7.40.9.1",
-  // "dev.zio" %% "zio-aws-netty" % "7.40.9.1", // HTTP client для AWS
-
-  //Otherwise we can use https://github.com/zio/zio-dynamodb
+  //AWS https://github.com/zio/zio-dynamodb
   "dev.zio" %% "zio-dynamodb" % "1.0.0-RC24",
   "dev.zio" %% "zio-aws-dynamodb" % "7.39.6.4",
   "dev.zio" %% "zio-aws-netty" % "7.39.6.4",
