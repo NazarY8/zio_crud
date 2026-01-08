@@ -415,11 +415,19 @@ sbt "testOnly * -- -v"
 
 ## 📚 Learning Resources
 
+### ZIO Interview Questions
 Check out **[ZIO_CHEATSHEET.md](./ZIO_CHEATSHEET.md)** for:
 - ZIO effects, fibers, and parallelism explained
 - Code examples comparing ZIO with Cats Effect and Future
 - How ZIO maps to JVM threads
 - ZIO Schema, Runtime, and Environment patterns
+
+### Library Usage Guide (BASED on AI)
+Check out **[LIBRARY_USAGE_GUIDE.md](./LIBRARY_USAGE_GUIDE.md)** for:
+- Detailed explanation of where each library from `build.sbt` is used
+- Visual diagrams showing configuration flow, HTTP request processing, and dependency graphs
+- Code examples with specific file locations and line numbers
+- Quick reference table for finding specific functionality
 
 ---
 
