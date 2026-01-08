@@ -290,20 +290,28 @@ Email in URL must match email in request body
 ## 📝 Project Architecture
 
 ```
-src/main/scala/
-├── Main.scala                    # Application entry point
-├── config/
-│   └── AwsConfig.scala          # AWS configuration model
-├── models/
-│   ├── User.scala               # User domain model
-│   ├── UserError.scala          # Domain-specific error types
-│   └── UserValidation.scala    # Input validation logic
-├── dao/
-│   └── UserDao.scala            # Data access layer
-├── services/
-│   └── UserService.scala        # Business logic layer
-└── controllers/
-    └── UserController.scala     # HTTP endpoints & Swagger UI
+src/
+├── main/scala/
+│   ├── Main.scala                    # Application entry point
+│   ├── config/
+│   │   └── AwsConfig.scala          # AWS configuration model
+│   ├── models/
+│   │   ├── User.scala               # User domain model
+│   │   ├── UserError.scala          # Domain-specific error types
+│   │   └── UserValidation.scala    # Input validation logic
+│   ├── dao/
+│   │   └── UserDao.scala            # Data access layer
+│   ├── services/
+│   │   └── UserService.scala        # Business logic layer
+│   └── controllers/
+│       └── UserController.scala     # HTTP endpoints & Swagger UI
+└── test/scala/
+    ├── dao/
+    │   └── TestUserDao.scala        # In-memory DAO for testing
+    ├── models/
+    │   └── UserValidationSpec.scala # Validation tests
+    └── services/
+        └── UserServiceSpec.scala    # Service layer tests
 ```
 
 ### Design Patterns
@@ -330,6 +338,7 @@ This project was created for **educational purposes** to practice and demonstrat
 - ✅ **Typed Errors** - Domain-specific error types with clear messages
 - ✅ **Swagger UI** - Interactive API documentation
 - ✅ **Clean Architecture** - Proper separation of concerns (Controller/Service/DAO)
+- ✅ **Unit Testing** - Comprehensive test coverage with ZIO Test (13 tests: 4 validation + 9 service)
 
 ### Potential Enhancements
 
@@ -340,25 +349,67 @@ The following features could be added to make this production-ready:
    - Role-based access control (RBAC)
    - OAuth2 integration
 
-2. **Testing**
-   - Unit tests for business logic
-   - Integration tests with test containers
-   - Property-based testing
-   - Mock DynamoDB for testing
-
-3. **Observability**
+2. **Observability**
    - Metrics collection (Prometheus)
    - Distributed tracing (OpenTelemetry)
    - Structured logging with correlation IDs
 
-4. **Resilience**
+3. **Resilience**
    - Retry policies for AWS operations
    - Circuit breakers
    - Rate limiting
 
-5. **API Versioning**
+4. **API Versioning**
    - Support for multiple API versions
    - Backward compatibility handling
+
+---
+
+## 🧪 Testing
+
+The project includes comprehensive unit tests using **ZIO Test**.
+
+### Running Tests
+
+```bash
+# Run all tests
+sbt test
+
+# Run specific test suite
+sbt "testOnly models.UserValidationSpec"
+sbt "testOnly services.UserServiceSpec"
+
+# Run with verbose output
+sbt "testOnly * -- -v"
+```
+
+### Test Coverage
+
+**13 tests total** covering:
+
+#### UserValidation (4 tests)
+- ✅ Should reject invalid email format
+- ✅ Should reject empty name
+- ✅ Should reject empty surname
+- ✅ Should accept valid user
+
+#### UserService (9 tests)
+- ✅ Should create user successfully
+- ✅ Should fail to create duplicate user
+- ✅ Should get user by email
+- ✅ Should fail to get non-existent user
+- ✅ Should update existing user
+- ✅ Should fail to update non-existent user
+- ✅ Should delete existing user
+- ✅ Should fail to delete non-existent user
+- ✅ Should list all users
+
+### Test Approach
+
+- **TestLayer Pattern** - In-memory DAO using `Ref[Map[String, User]]` for isolated testing
+- **Fast Execution** - No external dependencies, tests run in ~200ms
+- **Type-Safe Assertions** - ZIO Test's powerful assertion DSL
+- **Clean Isolation** - Each test gets fresh state via ZLayer
 
 ---
 
